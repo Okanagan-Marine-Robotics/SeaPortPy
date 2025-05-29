@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from seaport import __version__
 
@@ -10,7 +10,7 @@ setup(
     author='Andre Cox',
     author_email='andrecox@student.ubc.ca',
 
-    py_modules=['seaport'],
+    packages=find_packages(),
     install_requires=[
     'cobs',
     'crc',
