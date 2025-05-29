@@ -112,6 +112,12 @@ pub.publish(1, {
 ser.close()
 ```
 
+---
+
+## Use with [ESP Bridge](https://github.com/Okanagan-Marine-Robotics/ESP32_Bridge)
+
+The `seaport` library can be used with the [ESP Bridge](https://github.com/Okanagan-Marine-Robotics/ESP32_Bridge). If you are using this then please check the [ESP Bridge documentation](https://github.com/Okanagan-Marine-Robotics/ESP32_Bridge) for available channels and their meanings.
+
 ## Known Issues and Limitations
 
 - The `Subscriber` currently does not handle multi-byte channel IDs; it assumes single-byte IDs (0-254).
