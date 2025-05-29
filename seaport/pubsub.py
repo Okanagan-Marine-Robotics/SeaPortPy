@@ -17,13 +17,14 @@ class Subscriber:
             init_value=conf.init_value
         ))
 
-    def subscribe(self, channel_id, callback):
-        """Register a callback for a specific channel ID."""
-        self.callbacks[channel_id] = callback
+    def subscribe(self, channel_id, callback, debug=False):
+        """Register a callback for a specific channel ID with optional debug logging."""
+        self.callbacks[channel_id] = (callback, debug)
 
-    def _process_packet(self, packet: bytes):
+    def _process_packet(self, packet: bytes, debug=False):
         """Decode, validate, and unpack a single COBS-framed packet."""
-        print(packet.hex())
+        if debug:
+            print(f"[DEBUG] Raw packet: {packet.hex()}")
         try:
             decoded = cobs.decode(packet)
 
@@ -39,10 +40,15 @@ class Subscriber:
                 raise ValueError("Checksum mismatch")
 
             data = msgpack.unpackb(payload, raw=False)
+            if debug:
+                print(f"[DEBUG] Decoded channel_id: {channel_id}, data: {data}")
             return channel_id, data
 
         except Exception as e:
-            print(f"Failed to process packet: {e}")
+            if debug:
+                print(f"[DEBUG] Failed to process packet: {e}")
+            else:
+                print(f"Failed to process packet: {e}")
             return None, None
 
     def feed(self):
