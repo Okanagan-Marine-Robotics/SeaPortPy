@@ -1,9 +1,23 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-    "msgpack",
-    "cobs",
-    "crc"
-]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "seaport"
+version = "0.1.0"
+description = "High-speed, reliable serial communication library for robotic submarines."
+authors = [
+    { name = "Andre Cox", email = "andrecox@student.ubc.ca" }
+]
+readme = ""
+requires-python = ">=3.7"
+license = { text = "GPLv3" }
+
+dependencies = [
+    "cobs",
+    "crc",
+    "msgpack"
+]
+
+[project.urls]
+Homepage = "https://github.com/Okanagan-Marine-Robotics/SeaPortPy"
