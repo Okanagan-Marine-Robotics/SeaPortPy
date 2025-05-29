@@ -1,5 +1,5 @@
 import msgpack
-import seaport.conf
+import seaport.conf as conf
 from cobs import cobs
 from crc import Calculator, Configuration
 
