@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "seaport"
-version = "0.1.1"
+version = "0.1.2"
 description = "High-speed, reliable serial communication library for robotic submarines."
 authors = [
     { name = "Andre Cox", email = "andrecox@student.ubc.ca" }

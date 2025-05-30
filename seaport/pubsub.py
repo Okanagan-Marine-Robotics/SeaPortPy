@@ -70,10 +70,8 @@ class Subscriber:
                     self.buffer = self.buffer[idx + 1:]
 
                     # Get callback and debug flag for this channel
-                    channel_id, unpacked = self._process_packet(
-                        packet,
-                        debug=self.callbacks.get(channel_id, (None, False))[1] if 'channel_id' in locals() else False
-                    )
+                    debug_mode = any(self.callbacks.get(cid, (None, False))[1] for cid in self.callbacks)  # optional global debug check
+                    channel_id, unpacked = self._process_packet(packet, debug=debug_mode)
                     if channel_id is not None and channel_id in self.callbacks:
                         callback, _debug = self.callbacks[channel_id]
                         callback(unpacked)
