@@ -69,9 +69,14 @@ class Subscriber:
                     packet = self.buffer[:idx]
                     self.buffer = self.buffer[idx + 1:]
 
-                    channel_id, unpacked = self._process_packet(packet)
+                    # Get callback and debug flag for this channel
+                    channel_id, unpacked = self._process_packet(
+                        packet,
+                        debug=self.callbacks.get(channel_id, (None, False))[1] if 'channel_id' in locals() else False
+                    )
                     if channel_id is not None and channel_id in self.callbacks:
-                        self.callbacks[channel_id](unpacked)
+                        callback, _debug = self.callbacks[channel_id]
+                        callback(unpacked)
         except StopIteration:
             print("Data source ended.")
         except Exception as e:
