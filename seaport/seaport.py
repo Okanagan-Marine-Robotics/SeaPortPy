@@ -6,7 +6,7 @@ import seaport.conf as conf
 
 
 class SeaPort:
-    def __init__(self, serial_port):
+    def __init__(self, serial_port, debug=False):
         """
         Args:
             serial_port: An open serial.Serial object
@@ -17,6 +17,7 @@ class SeaPort:
         self.callbacks = {}
         self.running = False
         self.thread = None
+        self.debug = debug
 
         self.crc_calculator = Calculator(Configuration(
             width=8,
@@ -86,9 +87,10 @@ class SeaPort:
                         continue
                 self.buffer.extend(data)
 
-                while 0x00 in self.buffer:
+                while self.buffer and 0x00 in self.buffer:
                     idx = self.buffer.index(0x00)
                     if idx == 0:
+                        # Remove leading 0x00 to avoid infinite loop
                         self.buffer = self.buffer[1:]
                         continue
                     packet = self.buffer[:idx]
