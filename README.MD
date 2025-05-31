@@ -10,7 +10,7 @@
 
 - High-performance, low-latency serial communication
 - Reliable message encoding with COBS, CRC, and MsgPack
-- Pub/Sub messaging pattern with `Subscriber` and `Publisher` classes
+- Pub/Sub messaging pattern
 - Simple and extensible Python API
 
 ---
@@ -27,7 +27,13 @@ pip install git+https://github.com/Okanagan-Marine-Robotics/SeaPortPy
 
 ## Usage
 
-The `seaport` library provides two core classes for serial communication with reliable packet framing and error checking: `Subscriber` and `Publisher`.
+The `seaport` library provides two core functions for serial communication with reliable packet framing and error checking: `subscribe` and `publish`.
+
+### Constructor
+
+```python
+seaport(output_stream)
+```
 
 ---
 
@@ -39,45 +45,27 @@ The `Subscriber` reads and decodes incoming COBS-framed packets, verifies CRC8 c
 
 ```python
 import serial
-from seaport import Subscriber
+import seaport as sp
 
 # Example data generator: read data from a serial port
-def serial_data_gen(port="/dev/ttyUSB0", baudrate=115200):
-    ser = serial.Serial(port, baudrate, timeout=1)
-    try:
-        while True:
-            if ser.in_waiting:
-                yield ser.read(ser.in_waiting)
-    finally:
-        ser.close()
 
-# Create subscriber with data source generator
-sub = Subscriber(serial_data_gen())
+def received(data):
+    print(f"Data received: {data}")
 
-# Define callback for channel ID 1
-def on_channel_1(msg):
-    print("Received on channel 1:", msg)
+ser = serial.Serial(args.serial_port, args.baudrate, timeout=1)
+seaport = sp.SeaPort(ser)
 
-# Register callback
-sub.subscribe(1, on_channel_1)
+seaport.subscribe(254, lambda data: received(data))
 
-# Start feeding data and dispatching callbacks
-while True:
-    sub.feed()
+seaport.start() # Start the subscriber to listen for incoming messages
 
 ```
 
 ### Publisher
 
-The `Publisher` class sends messages to a writeable output stream (such as a serial port). It serializes data using [MsgPack](https://msgpack.org/), adds a `channel_id`, computes a CRC-8 checksum, encodes the message using [COBS (Consistent Overhead Byte Stuffing)](https://en.wikipedia.org/wiki/Consistent_Overhead_Byte_Stuffing), and appends a null byte (`\x00`) to frame the packet.
+The `Publisher` sends messages to a writeable output stream (such as a serial port). It serializes data using [MsgPack](https://msgpack.org/), adds a `channel_id`, computes a CRC-8 checksum, encodes the message using [COBS (Consistent Overhead Byte Stuffing)](https://en.wikipedia.org/wiki/Consistent_Overhead_Byte_Stuffing), and appends a null byte (`\x00`) to frame the packet.
 
 ---
-
-#### Constructor
-
-```python
-Publisher(output_stream)
-```
 
 - **output_stream** – A writeable binary stream, such as a serial.Serial object.
 
@@ -94,21 +82,18 @@ publish(channel_id: int, data: dict)
 
 ```python
 import serial
-from seaport import Publisher
+import seaport as sp
 
 # Open serial port
 ser = serial.Serial("/dev/ttyUSB0", 115200)
 
-# Create Publisher
-pub = Publisher(ser)
-
 # Send a command on channel 1
-pub.publish(1, {
+sp.publish(1, {
     "command": "set_depth",
     "depth_meters": 10.5
 })
 
-# Clean up
+# Clean up if needed (don't close if you still need the subscriber)
 ser.close()
 ```
 
@@ -124,4 +109,4 @@ The `seaport` library can be used with the [ESP Bridge](https://github.com/Okana
 
 - In the case that you receive a packet with an invalid CRC, the `Subscriber` will discard the packet without any signaling. You may want to implement your own error handling or logging.
 
-- The `Subscriber` assumes that we receive valid COBS-encoded packets. If we send bad data, it will be stored in the `buffer` and will not be processed until valid data is received.
+- The `Subscriber` assumes that we receive valid COBS-encoded packets. If we send bad data, it will be stored in the `buffer` and will not be processed until valid data is received. However this will lose the current packet.
